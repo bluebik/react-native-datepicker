@@ -148,17 +148,38 @@ class DatePicker extends Component {
   }
 
   getDateStr(date = this.props.date) {
-    const {mode, format = FORMATS[mode]} = this.props;
+    const {mode, format = FORMATS[mode], locale} = this.props;
 
-    const dateInstance = date instanceof Date
-      ? date
-      : this.getDate(date);
-
-    if (typeof this.props.getDateStr === 'function') {
-      return this.props.getDateStr(dateInstance);
+    if (locale === 'th') {
+      require('moment/locale/th');
+      Moment.locale('th');
+    } else {
+      Moment.locale('en');
     }
 
-    return Moment(dateInstance).format(format);
+    const dateFormat = this.getDateFormat(date, format, mode, locale);
+
+    if (mode === 'time' && locale === 'th') {
+     return `${dateFormat} น.`;
+    }
+
+    return dateFormat;
+  }
+
+  getDateFormat(date, format, mode, locale = 'en') {
+    if (mode === 'date' && locale === 'th') {
+      if (date instanceof Date) {
+        return Moment(date).format(format);
+      } else {
+        return Moment(this.getDate(date)).add(543, 'years').format(format);
+      }
+    } else {
+      if (date instanceof Date) {
+        return Moment(date).format(format);
+      } else {
+        return Moment(this.getDate(date)).format(format);
+      }
+    }
   }
 
   datePicked() {
